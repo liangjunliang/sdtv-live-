@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>山东电视台直播</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: Arial; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); min-height: 100vh; padding: 20px; }
+        .container { max-width: 1200px; margin: 0 auto; background: white; border-radius: 15px; padding: 30px; box-shadow: 0 10px 30px rgba(0,0,0,0.2); }
+        header { text-align: center; margin-bottom: 30px; }
+        h1 { color: #e53935; font-size: 2.5rem; margin-bottom: 10px; }
+        .player { background: #000; border-radius: 10px; padding: 20px; margin-bottom: 20px; }
+        video { width: 100%; border-radius: 5px; }
+        .channels { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 15px; margin-top: 20px; }
+        .channel-btn { padding: 15px; background: #f5f5f5; border: 2px solid #ddd; border-radius: 8px; cursor: pointer; transition: all 0.3s; text-align: center; font-weight: bold; }
+        .channel-btn:hover { background: #e3f2fd; border-color: #2196f3; }
+        .controls { display: flex; gap: 10px; margin-top: 20px; }
+        .btn { padding: 12px 25px; background: #4caf50; color: white; border: none; border-radius: 8px; cursor: pointer; }
+        footer { text-align: center; margin-top: 30px; color: #666; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>📺 山东电视台直播</h1>
+            <p style="color: #666;">高清流畅的山东电视台在线直播平台</p>
+        </header>
+        
+        <div class="player">
+            <video id="videoElement" controls>
+                <source id="videoSource" src="" type="application/vnd.apple.mpegurl">
+                您的浏览器不支持HTML5视频播放
+            </video>
+        </div>
+        
+        <div id="loading" style="display:none; text-align:center; padding:20px;">
+            <div style="width:50px;height:50px;border:5px solid #f3f3f3;border-top:5px solid #2196f3;border-radius:50%;animation:spin 1s linear infinite;margin:0 auto 15px;"></div>
+            <p>正在加载直播流...</p>
+        </div>
+        
+        <div style="background:#e8f5e9;padding:15px;border-radius:10px;margin-bottom:20px;">
+            <h3 id="channelName" style="color:#2e7d32;">请选择频道</h3>
+            <p id="channelStatus">从下方选择要观看的频道</p>
+        </div>
+        
+        <div class="channels">
+            <button class="channel-btn" onclick="playChannel('sdws')">山东卫视</button>
+            <button class="channel-btn" onclick="playChannel('sdql')">山东齐鲁</button>
+            <button class="channel-btn" onclick="playChannel('sdxw')">山东新闻</button>
+            <button class="channel-btn" onclick="playChannel('sdty')">山东体育</button>
+            <button class="channel-btn" onclick="playChannel('sdsh')">山东生活</button>
+            <button class="channel-btn" onclick="playChannel('sdzy')">山东综艺</button>
+            <button class="channel-btn" onclick="playChannel('sdnk')">山东农科</button>
+            <button class="channel-btn" onclick="playChannel('sdwl')">山东文旅</button>
+            <button class="channel-btn" onclick="playChannel('sdse')">山东少儿</button>
+        </div>
+        
+        <div class="controls">
+            <button class="btn" onclick="playVideo()">▶ 播放</button>
+            <button class="btn" style="background:#ff9800;" onclick="pauseVideo()">⏸ 暂停</button>
+            <button class="btn" style="background:#f44336;" onclick="stopVideo()">⏹ 停止</button>
+            <button class="btn" style="background:#2196f3;" onclick="toggleFullscreen()">⛶ 全屏</button>
+        </div>
+        
+        <div style="background:#fff3e0;padding:20px;border-radius:10px;margin-top:30px;">
+            <h3 style="color:#e65100;">使用说明</h3>
+            <ol style="line-height:1.8;margin-top:10px;">
+                <li>从上方选择要观看的频道</li>
+                <li>点击"播放"按钮开始观看</li>
+                <li>如无法播放，请确认PHP服务已部署</li>
+                <li>支持全屏观看，点击全屏按钮或双击视频区域</li>
+            </ol>
+        </div>
+        
+        <footer>
+            <p>© 2024 山东电视台直播 | 仅供学习交流使用</p>
+            <p style="font-size:0.9rem;margin-top:5px;color:#888;">需要部署PHP服务后方可正常播放</p>
+        </footer>
+    </div>
+
+    <script>
+        // 配置你的PHP地址 - 重要！
+        const PHP_SERVER = ''; // 暂时留空
+        
+        let currentChannel = 'sdws';
+        
+        function playChannel(channelId) {
+            currentChannel = channelId;
+            const channels = {
+                'sdws': '山东卫视',
+                'sdql': '山东齐鲁',
+                'sdxw': '山东新闻',
+                'sdty': '山东体育',
+                'sdsh': '山东生活',
+                'sdzy': '山东综艺',
+                'sdnk': '山东农科',
+                'sdwl': '山东文旅',
+                'sdse': '山东少儿'
+            };
+            
+            document.getElementById('channelName').textContent = channels[channelId];
+            document.getElementById('channelStatus').textContent = '准备播放，点击"播放"按钮开始';
+        }
+        
+        function playVideo() {
+            if (!PHP_SERVER) {
+                alert('PHP服务未配置！\n\n请先部署sdtv.php文件到支持PHP的主机，然后修改index.html中的PHP_SERVER变量。');
+                return;
+            }
+            
+            document.getElementById('loading').style.display = 'block';
+            const video = document.getElementById('videoElement');
+            const source = document.getElementById('videoSource');
+            
+            source.src = `${PHP_SERVER}?id=${currentChannel}&type=m3u8`;
+            video.load();
+            
+            video.addEventListener('canplay', () => {
+                document.getElementById('loading').style.display = 'none';
+                document.getElementById('channelStatus').textContent = '播放中...';
+                video.play();
+            });
+            
+            video.addEventListener('error', () => {
+                document.getElementById('loading').style.display = 'none';
+                alert('播放失败，请检查PHP服务或网络连接');
+            });
+        }
+        
+        function pauseVideo() {
+            const video = document.getElementById('videoElement');
+            video.pause();
+            document.getElementById('channelStatus').textContent = '已暂停';
+        }
+        
+        function stopVideo() {
+            const video = document.getElementById('videoElement');
+            const source = document.getElementById('videoSource');
+            
+            video.pause();
+            source.src = '';
+            video.load();
+            
+            document.getElementById('channelStatus').textContent = '已停止';
+        }
+        
+        function toggleFullscreen() {
+            const video = document.getElementById('videoElement');
+            if (!document.fullscreenElement) {
+                if (video.requestFullscreen) video.requestFullscreen();
+                else if (video.webkitRequestFullscreen) video.webkitRequestFullscreen();
+            } else {
+                if (document.exitFullscreen) document.exitFullscreen();
+                else if (document.webkitExitFullscreen) document.webkitExitFullscreen();
+            }
+        }
+        
+        // 默认选择第一个频道
+        playChannel('sdws');
+        
+        // CSS动画
+        const style = document.createElement('style');
+        style.textContent = '@keyframes spin {0%{transform:rotate(0deg);}100%{transform:rotate(360deg);}}';
+        document.head.appendChild(style);
+    </script>
+</body>
+</html>
